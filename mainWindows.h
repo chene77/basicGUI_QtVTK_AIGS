@@ -71,8 +71,22 @@ class vtkTrackerTool;
 
 class QTimer;
 
+//! an enum type to specify the type of tracked objects
+enum enumTrackedObjectTypes {
+  enNeedle = 0,
+  enStylus,
+  enLaserPointer,
+  enLaserPlane,
+  enUSProbe,
+  enPhantom,
+  enCalibrationBlock,
+  enOthers,
+  enTrackedObject_Max
+  };
+
 // port number, rom file name
-typedef std::tuple< int, QString > trackedObjectTypes;
+typedef std::tuple< int, QString, enumTrackedObjectTypes > trackedObjectTypes;
+
 
 class basic_QtVTK : public QMainWindow, private Ui::MainWindow
 {
@@ -93,6 +107,7 @@ public slots:
   void screenShot();
   void startTracker(bool);
   void updateTrackerInfo();
+  void stylusCalibration(bool);
 
   void aboutThisProgram();
 
@@ -132,7 +147,7 @@ private:
   std::vector< vtkTrackerTool * >                     tools;
 
   int                                                 screenShotFileNumber;
-  bool                                                isTrackerInitialized;
+  bool                                                isTrackerInitialized, isStylusCalibrated;
   int                                                 numTrackedTools;
   int                                                 logoWidgetX, logoWidgetY;
 };

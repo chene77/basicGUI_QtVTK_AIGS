@@ -73,6 +73,7 @@ POSSIBILITY OF SUCH DAMAGES.
 #include <vtkTexturedButtonRepresentation2D.h>
 #include <vtkWindowToImageFilter.h>
 #include <vtkXMLPolyDataReader.h>
+#include <vtkMatrix4x4.h>
 
 // tracker
 #include <vtkNDITracker.h>
@@ -136,9 +137,9 @@ void basic_QtVTK::setupVTKObjects()
   screenShotFileNumber = 0;
 
   // tracker
-  this->isTrackerInitialized = false;
-  trackedObjects.push_back(std::make_tuple(4, QString("D://chene//data//NDI_roms//8700248.rom"))); // NDI 3 sphere linear stylus
-  trackedObjects.push_back(std::make_tuple(5, QString("D://chene//data//NDI_roms//8700302.rom"))); // NDI 4 sphere planar
+  this->isTrackerInitialized = isStylusCalibrated = false;
+  trackedObjects.push_back(std::make_tuple(4, QString("D://chene//data//NDI_roms//8700248.rom"), enumTrackedObjectTypes::enStylus)); // NDI 3 sphere linear stylus
+  trackedObjects.push_back(std::make_tuple(5, QString("D://chene//data//NDI_roms//8700302.rom"), enumTrackedObjectTypes::enOthers)); // NDI 4 sphere planar
 
   this->openGLWidget->SetRenderWindow(renWin);
   
@@ -160,6 +161,7 @@ void basic_QtVTK::setupQTObjects()
   connect(actionScreen_Shot, SIGNAL(triggered()), this, SLOT(screenShot()));
   connect(actionthis_program, SIGNAL(triggered()), this, SLOT(aboutThisProgram()));
   connect(trackerButton, SIGNAL(toggled(bool)), this, SLOT(startTracker(bool)));
+  connect(pivotButton, SIGNAL(toggled(bool)), this, SLOT(stylusCalibration(bool)));
 }
 
 void basic_QtVTK::startTracker(bool checked)
@@ -333,6 +335,61 @@ void basic_QtVTK::loadMesh()
     {
     QErrorMessage *em = new QErrorMessage(this);
     em->showMessage("Input file format not supported");
+    }
+}
+
+
+void basic_QtVTK::stylusCalibration(bool checked)
+{
+  // assumes that there is only 1 stylus among all the tracked objects
+
+  if (isTrackerInitialized)
+    {
+    // find out which port is the stylus
+    int stylusPort = -1;
+    int toolIdx = -1;
+    for (int i = 0; i < (int)trackedObjects.size(); i++)
+      {
+      int port = std::get<0>(trackedObjects[i]);
+      enumTrackedObjectTypes myType = std::get<2>(trackedObjects[i]);
+
+      if (myType == enumTrackedObjectTypes::enStylus)
+        {
+        stylusPort = port;
+        toolIdx = i;
+        }
+      }
+
+    if (checked)
+      {
+      qDebug() << "Starting pivot calibration";
+      double m[16] = { 1,0,0,0,
+        0,1,0,0,
+        0,0,1,0,
+        0,0,0,1 };
+      vtkNew<vtkMatrix4x4> matrix;
+      matrix->DeepCopy(m);
+
+      qDebug() << "stylus port:" << stylusPort << "index:" << toolIdx;
+      tools[toolIdx]->SetCalibrationMatrix(matrix);
+      tools[toolIdx]->InitializeToolTipCalibration();
+      tools[toolIdx]->SetCollectToolTipCalibrationData(1);
+      }
+    else
+      {
+      tools[toolIdx]->SetCollectToolTipCalibrationData(0);
+      QString tempString;
+      tempString.setNum(tools[toolIdx]->DoToolTipCalibration());
+      stylusTipRMS->setText(tempString);
+      isStylusCalibrated = true;
+      qDebug() << "Pivot calibration finished";
+      // tools[toolIdx]->Print(std::cerr);
+      }
+    }
+  else
+    {
+    // if tracker is not initialized, do nothing and uncheck the button
+    pivotButton->setChecked(false);
     }
 }
 
