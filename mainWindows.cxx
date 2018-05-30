@@ -60,6 +60,7 @@ POSSIBILITY OF SUCH DAMAGES.
 #include <vtkLogoRepresentation.h>
 #include <vtkLogoWidget.h>
 #include <vtkMatrix4x4.h>
+#include <vtkNamedColors.h>
 #include <vtkNew.h>
 #include <vtkOBJReader.h>
 #include <vtkPLYReader.h>
@@ -559,6 +560,11 @@ void basic_QtVTK::createLinearZStylusActor()
   mapper->SetInputConnection(append->GetOutputPort());
   stylusActor->SetMapper(mapper);
   stylusActor->SetUserTransform(tools[toolIdx]->GetTransform());
+
+  vtkNew<vtkNamedColors> color;
+  stylusActor->GetProperty()->SetColor(color->GetColor3d("zinc_white").GetRed(),
+    color->GetColor3d("zinc_white").GetGreen(),
+    color->GetColor3d("zinc_white").GetBlue());
 
   ren->AddActor(stylusActor);
 
