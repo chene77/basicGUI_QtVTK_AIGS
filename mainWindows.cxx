@@ -47,15 +47,19 @@ POSSIBILITY OF SUCH DAMAGES.
 
 // VTK includes
 #include <vtkActor.h>
+#include <vtkAppendPolyData.h>
 #include <vtkButtonWidget.h>
 #include <vtkCamera.h>
+#include <vtkConeSource.h>
 #include <vtkCoordinate.h>
 #include <vtkGenericOpenGLRenderWindow.h>
 #include <vtkImageCanvasSource2D.h>
 #include <vtkImageData.h>
 #include <vtkImageExtractComponents.h>
+#include <vtkLineSource.h>
 #include <vtkLogoRepresentation.h>
 #include <vtkLogoWidget.h>
+#include <vtkMatrix4x4.h>
 #include <vtkNew.h>
 #include <vtkOBJReader.h>
 #include <vtkPLYReader.h>
@@ -71,9 +75,11 @@ POSSIBILITY OF SUCH DAMAGES.
 #include <vtkSmartPointer.h>
 #include <vtkSTLReader.h>
 #include <vtkTexturedButtonRepresentation2D.h>
+#include <vtkTransform.h>
+#include <vtkTubeFilter.h>
 #include <vtkWindowToImageFilter.h>
 #include <vtkXMLPolyDataReader.h>
-#include <vtkMatrix4x4.h>
+
 
 // tracker
 #include <vtkNDITracker.h>
@@ -114,12 +120,13 @@ basic_QtVTK::basic_QtVTK()
 void basic_QtVTK::createVTKObjects()
 {
   actor = vtkSmartPointer<vtkActor>::New();
+  myTracker = vtkSmartPointer< vtkNDITracker >::New();
   ren = vtkSmartPointer<vtkRenderer>::New();
   renWin = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+  stylusActor = vtkSmartPointer<vtkActor>::New();
   trackerDrawing = vtkSmartPointer<vtkImageCanvasSource2D>::New();
   trackerLogoRepresentation = vtkSmartPointer<vtkLogoRepresentation>::New();
   trackerLogoWidget = vtkSmartPointer<vtkLogoWidget>::New();
-  myTracker = vtkSmartPointer< vtkNDITracker >::New();
 }
 
 
@@ -343,6 +350,7 @@ void basic_QtVTK::stylusCalibration(bool checked)
 {
   // assumes that there is only 1 stylus among all the tracked objects
 
+  // make sure the tracker is initialized/found first.
   if (isTrackerInitialized)
     {
     // find out which port is the stylus
@@ -384,6 +392,7 @@ void basic_QtVTK::stylusCalibration(bool checked)
       isStylusCalibrated = true;
       qDebug() << "Pivot calibration finished";
       // tools[toolIdx]->Print(std::cerr);
+      createLinearZStylusActor();
       }
     }
   else
@@ -410,7 +419,7 @@ void basic_QtVTK::createTrackerLogo()
   trackerDrawing->Update();
 
   trackerLogoRepresentation->SetImage(trackerDrawing->GetOutput());
-  trackerLogoRepresentation->SetPosition(0, 0);
+  trackerLogoRepresentation->SetPosition(.45, 0);
   trackerLogoRepresentation->SetPosition2(.1, .1);
   trackerLogoRepresentation->GetImageProperty()->SetOpacity(.5);
 
@@ -486,4 +495,74 @@ void basic_QtVTK::aboutThisProgram()
       "By: \n\n"
       "Elvis C.S. Chen\t\t"
       "chene@robarts.ca"));
+}
+
+
+void basic_QtVTK::createLinearZStylusActor()
+{
+  double radius = 1.5; // mm
+  int nSides = 36;
+                         // find out which port is the stylus
+  int stylusPort = -1;
+  int toolIdx = -1;
+  for (int i = 0; i < (int)trackedObjects.size(); i++)
+    {
+    int port = std::get<0>(trackedObjects[i]);
+    enumTrackedObjectTypes myType = std::get<2>(trackedObjects[i]);
+
+    if (myType == enumTrackedObjectTypes::enStylus)
+      {
+      stylusPort = port;
+      toolIdx = i;
+      }
+    }
+
+  vtkMatrix4x4 *calibMatrix = tools[toolIdx]->GetCalibrationMatrix();
+
+  double *pos, *outpt;
+  pos = new double[4];
+  outpt = new double[4];
+
+  pos[0] = pos[1] = 0.0;
+  pos[2] = pos[3] = 1.0;
+  calibMatrix->MultiplyPoint(pos, outpt);
+  double l = sqrt(outpt[0] * outpt[0] + outpt[1] * outpt[1] + outpt[2] * outpt[2]);
+  pos[0] = outpt[0] / l;
+  pos[1] = outpt[1] / l;
+  pos[2] = outpt[2] / l; // pos now is the normalized direction of the stylus
+
+  vtkNew<vtkAppendPolyData> append;
+  double coneHeight = 25.0;
+
+  vtkNew<vtkLineSource> line;
+  line->SetPoint1(coneHeight*pos[0], coneHeight*pos[1], coneHeight*pos[2]);
+  line->SetPoint2(outpt[0], outpt[1], outpt[2]);
+
+  vtkNew<vtkTubeFilter> tube;
+  tube->SetInputConnection(line->GetOutputPort());
+  tube->SetRadius(radius);
+  tube->SetNumberOfSides(nSides);
+
+
+  vtkNew<vtkConeSource> cone;
+  cone->SetHeight(coneHeight);
+  cone->SetRadius(radius);
+  cone->SetDirection(-pos[0], -pos[1], -pos[2]);
+  cone->SetResolution(nSides);
+  cone->SetCenter(.5*coneHeight*pos[0], .5*coneHeight*pos[1], .5*coneHeight*pos[2]);
+  //cone->SetCenter(outpt[0] - coneHeight*pos[0], outpt[1] - coneHeight*pos[1], outpt[2] - coneHeight*pos[2]);
+
+  append->AddInputConnection(tube->GetOutputPort());
+  append->AddInputConnection(cone->GetOutputPort());
+
+  vtkNew<vtkPolyDataMapper> mapper;
+  mapper->SetInputConnection(append->GetOutputPort());
+  stylusActor->SetMapper(mapper);
+  stylusActor->SetUserTransform(tools[toolIdx]->GetTransform());
+
+  ren->AddActor(stylusActor);
+
+  delete[] pos;
+  delete[] outpt;
+
 }

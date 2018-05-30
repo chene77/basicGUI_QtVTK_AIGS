@@ -126,6 +126,7 @@ public:
 
 private:
   void createTrackerLogo();
+  void createLinearZStylusActor();
 
 private:
   // QT Objects
@@ -133,11 +134,13 @@ private:
 
   // VTK Objects
   vtkSmartPointer<vtkActor>                           actor;
+  vtkSmartPointer<vtkActor>                           stylusActor;
   vtkSmartPointer<vtkGenericOpenGLRenderWindow>       renWin;
   vtkSmartPointer<vtkImageCanvasSource2D>             trackerDrawing;
   vtkSmartPointer<vtkLogoRepresentation>              trackerLogoRepresentation;
   vtkSmartPointer<vtkLogoWidget>                      trackerLogoWidget;
   vtkSmartPointer<vtkRenderer>                        ren;
+
 
   /*!
   * Tracker related objects.
