@@ -46,6 +46,7 @@
      <string>&amp;File</string>
     </property>
     <addaction name="actionLoad_Mesh"/>
+    <addaction name="actionLoad_Fiducial"/>
     <addaction name="separator"/>
     <addaction name="actionScreen_Shot"/>
     <addaction name="separator"/>
@@ -142,7 +143,7 @@
            <enum>QFrame::Plain</enum>
           </property>
           <property name="text">
-           <string>RMS error (mm)</string>
+           <string>RMS Error (mm)</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -231,6 +232,14 @@
   <action name="actionTracker">
    <property name="text">
     <string>Tracker</string>
+   </property>
+  </action>
+  <action name="actionLoad_Fiducial">
+   <property name="text">
+    <string>Load &amp;Fiducial</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
    </property>
   </action>
  </widget>

@@ -65,6 +65,7 @@ POSSIBILITY OF SUCH DAMAGES.
 #include <vtkOBJReader.h>
 #include <vtkPLYReader.h>
 #include <vtkPNGWriter.h>
+#include <vtkPoints.h>
 #include <vtkPolyData.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkPolyDataReader.h>
@@ -73,6 +74,8 @@ POSSIBILITY OF SUCH DAMAGES.
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkSimplePointsReader.h>
+#include <vtkSimplePointsWriter.h>
 #include <vtkSmartPointer.h>
 #include <vtkSTLReader.h>
 #include <vtkTexturedButtonRepresentation2D.h>
@@ -112,7 +115,7 @@ basic_QtVTK::basic_QtVTK()
   createVTKObjects();
   setupVTKObjects();
   setupQTObjects();
-
+    
   ren->ResetCameraClippingRange();
   this->openGLWidget->GetRenderWindow()->Render();
 }
@@ -170,6 +173,7 @@ void basic_QtVTK::setupQTObjects()
   connect(actionthis_program, SIGNAL(triggered()), this, SLOT(aboutThisProgram()));
   connect(trackerButton, SIGNAL(toggled(bool)), this, SLOT(startTracker(bool)));
   connect(pivotButton, SIGNAL(toggled(bool)), this, SLOT(stylusCalibration(bool)));
+  connect(actionLoad_Fiducial, SIGNAL(triggered()), this, SLOT(loadFiducialPts()));
 }
 
 void basic_QtVTK::startTracker(bool checked)
@@ -282,6 +286,24 @@ void basic_QtVTK::updateTrackerInfo()
     ren->ResetCameraClippingRange();
     this->openGLWidget->GetRenderWindow()->Render();
     }
+}
+
+
+void basic_QtVTK::loadFiducialPts()
+{
+  // fiducial is stored as lines of 3 floats
+  QString fname = QFileDialog::getOpenFileName(this,
+    tr("Open fiducial file"),
+    QDir::currentPath(),
+    "PolyData File (*.xyz)");
+  vtkNew<vtkSimplePointsReader> reader;
+  reader->SetFileName(fname.toStdString().c_str());
+  reader->Update();
+
+  fiducialPts = reader->GetOutput()->GetPoints();
+  fiducialPts->Modified();
+
+  qDebug() << "fiducial:" << fiducialPts->GetNumberOfPoints();
 }
 
 

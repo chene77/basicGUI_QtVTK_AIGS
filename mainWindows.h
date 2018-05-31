@@ -66,6 +66,7 @@ class vtkImageCanvasSource2D;
 class vtkLogoRepresentation;
 class vtkLogoWidget; 
 class vtkNDITracker;
+class vtkPoints;
 class vtkRenderer;
 class vtkTrackerTool;
 
@@ -102,6 +103,7 @@ public slots:
   virtual void slotExit();
 
   void loadMesh();
+  void loadFiducialPts();
   void editMeshColor();
   void editRendererBackgroundColor();
   void screenShot();
@@ -140,6 +142,7 @@ private:
   vtkSmartPointer<vtkLogoRepresentation>              trackerLogoRepresentation;
   vtkSmartPointer<vtkLogoWidget>                      trackerLogoWidget;
   vtkSmartPointer<vtkRenderer>                        ren;
+  vtkSmartPointer<vtkPoints>                          fiducialPts;
 
 
   /*!
