@@ -94,6 +94,7 @@ POSSIBILITY OF SUCH DAMAGES.
 #include <QDebug>
 #include <QErrorMessage>
 #include <QFileDialog>
+#include <QLCDNumber>
 #include <QMessageBox>
 #include <QTimer>
 
@@ -303,7 +304,8 @@ void basic_QtVTK::loadFiducialPts()
   fiducialPts = reader->GetOutput()->GetPoints();
   fiducialPts->Modified();
 
-  qDebug() << "fiducial:" << fiducialPts->GetNumberOfPoints();
+  qDebug() << "# of fiducial:" << fiducialPts->GetNumberOfPoints();
+  statusBar()->showMessage(tr("Loaded fiducial file"));
 }
 
 
@@ -409,9 +411,7 @@ void basic_QtVTK::stylusCalibration(bool checked)
     else
       {
       tools[toolIdx]->SetCollectToolTipCalibrationData(0);
-      QString tempString;
-      tempString.setNum(tools[toolIdx]->DoToolTipCalibration());
-      stylusTipRMS->setText(tempString);
+      this->stylusTipRMS->display(tools[toolIdx]->DoToolTipCalibration());
       isStylusCalibrated = true;
       qDebug() << "Pivot calibration finished";
       // tools[toolIdx]->Print(std::cerr);
