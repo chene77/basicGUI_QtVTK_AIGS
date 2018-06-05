@@ -101,6 +101,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
          <widget class="QPushButton" name="trackerButton">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Start/Stop tracking. For first time press, the tracker will be initialized. &lt;/p&gt;&lt;p&gt;This is a toggle button with 2 states.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
            <string>Start Tracker</string>
           </property>
@@ -123,6 +126,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
          <widget class="QPushButton" name="pivotButton">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Perform pivot calibration of a digitizing stylus. &lt;/p&gt;&lt;p&gt;This is a toggle button. Press it once to start pivot calibration, press it again to finish pivot calibration.&lt;/p&gt;&lt;p&gt;Once pivot calibration is completed, the RMS error (typically in mm) will be displayed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
            <string>Pivot Calib</string>
           </property>
@@ -134,7 +140,7 @@
         <item>
          <widget class="QLabel" name="rms">
           <property name="toolTip">
-           <string>RMS error of pivot calibration</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;RMS error of pivot calibration.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="frameShape">
            <enum>QFrame::Box</enum>
@@ -174,13 +180,29 @@
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
          <widget class="QPushButton" name="collectSinglePtbutton">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Collect a single fiducial position using the stylus.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
            <string>Collect</string>
           </property>
          </widget>
         </item>
         <item>
+         <widget class="QLCDNumber" name="numCollected">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of fiducial measured.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="segmentStyle">
+           <enum>QLCDNumber::Flat</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="resetPhantomPtButton">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Reset the fiducial collection. If a fiducial file (.xyz) was read, it is also deleted.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
            <string>Reset</string>
           </property>
@@ -188,6 +210,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="deleteOnePhantomPtButton">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Delete the last measured/collected fiducial point.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
            <string>Delete 1</string>
           </property>
@@ -195,6 +220,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="phantomRegistrationButton">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Register the measured/collected fiducial to the read (.xyz) fiducial point. The read (.xyz) fiducial is the source, and the measured fiducial is the target.&lt;/p&gt;&lt;p&gt;The registration is performed as a rigid body vtkLandmarkRegistration. Once registered, the fiducial registration error (FRE) is displayed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
            <string>Register</string>
           </property>
@@ -202,11 +230,14 @@
         </item>
         <item>
          <widget class="QLabel" name="label">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fiducial Registration Error in mm.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="frameShape">
            <enum>QFrame::Box</enum>
           </property>
           <property name="text">
-           <string>FRE</string>
+           <string>FRE (mm)</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

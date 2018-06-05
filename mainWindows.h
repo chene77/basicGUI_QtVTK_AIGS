@@ -110,6 +110,10 @@ public slots:
   void startTracker(bool);
   void updateTrackerInfo();
   void stylusCalibration(bool);
+  void collectSinglePointPhantom();
+  void resetPhantomCollectedPoints();
+  void deleteOnePhantomCollectedPoints();
+  void performPhantomRegistration();
 
   void aboutThisProgram();
 

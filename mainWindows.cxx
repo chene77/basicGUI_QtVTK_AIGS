@@ -175,6 +175,10 @@ void basic_QtVTK::setupQTObjects()
   connect(trackerButton, SIGNAL(toggled(bool)), this, SLOT(startTracker(bool)));
   connect(pivotButton, SIGNAL(toggled(bool)), this, SLOT(stylusCalibration(bool)));
   connect(actionLoad_Fiducial, SIGNAL(triggered()), this, SLOT(loadFiducialPts()));
+  connect(collectSinglePtbutton, SIGNAL(clicked()), this, SLOT(collectSinglePointPhantom()));
+  connect(resetPhantomPtButton, SIGNAL(clicked()), this, SLOT(resetPhantomCollectedPoints()));
+  connect(deleteOnePhantomPtButton, SIGNAL(clicked()), this, SLOT(deleteOnePhantomCollectedPoints()));
+  connect(phantomRegistrationButton, SIGNAL(clicked()), this, SLOT(performPhantomRegistration()));
 }
 
 void basic_QtVTK::startTracker(bool checked)
@@ -592,5 +596,32 @@ void basic_QtVTK::createLinearZStylusActor()
 
   delete[] pos;
   delete[] outpt;
+
+}
+
+
+void basic_QtVTK::collectSinglePointPhantom()
+{
+  qDebug() << "collect";
+}
+
+
+void basic_QtVTK::resetPhantomCollectedPoints()
+{
+
+  qDebug() << "reset";
+}
+
+
+void basic_QtVTK::deleteOnePhantomCollectedPoints()
+{
+
+  qDebug() << "delete";
+}
+
+
+void basic_QtVTK::performPhantomRegistration()
+{
+  qDebug() << "register";
 
 }
