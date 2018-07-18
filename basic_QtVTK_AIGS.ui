@@ -32,7 +32,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -47,6 +47,7 @@
     </property>
     <addaction name="actionLoad_Mesh"/>
     <addaction name="actionLoad_Fiducial"/>
+    <addaction name="actionLoad_Volume"/>
     <addaction name="separator"/>
     <addaction name="actionScreen_Shot"/>
     <addaction name="separator"/>
@@ -337,6 +338,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionLoad_Volume">
+   <property name="text">
+    <string>Load Volume</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
    </property>
   </action>
  </widget>

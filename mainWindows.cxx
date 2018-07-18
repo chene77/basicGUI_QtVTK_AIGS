@@ -169,6 +169,7 @@ void basic_QtVTK::setupQTObjects()
   connect(action_Background_Color, SIGNAL(triggered()), this, SLOT(editRendererBackgroundColor()));
   connect(action_Quit, SIGNAL(triggered()), this, SLOT(slotExit()));
   connect(actionLoad_Mesh, SIGNAL(triggered()), this, SLOT(loadMesh()));
+  connect(actionLoad_Volume, SIGNAL(triggered()), this, SLOT(loadVolume()));
   connect(actionMesh_Color, SIGNAL(triggered()), this, SLOT(editMeshColor()));
   connect(actionScreen_Shot, SIGNAL(triggered()), this, SLOT(screenShot()));
   connect(actionthis_program, SIGNAL(triggered()), this, SLOT(aboutThisProgram()));
@@ -312,6 +313,11 @@ void basic_QtVTK::loadFiducialPts()
   statusBar()->showMessage(tr("Loaded fiducial file"));
 }
 
+
+void basic_QtVTK::loadVolume()
+{
+  std::cerr << "hello";
+}
 
 void basic_QtVTK::loadMesh()
   {

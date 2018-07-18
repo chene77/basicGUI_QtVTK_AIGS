@@ -103,6 +103,7 @@ public slots:
   virtual void slotExit();
 
   void loadMesh();
+  void loadVolume();
   void loadFiducialPts();
   void editMeshColor();
   void editRendererBackgroundColor();
