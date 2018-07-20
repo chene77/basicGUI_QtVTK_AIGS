@@ -333,8 +333,11 @@ void basic_QtVTK::loadVolume()
   vtkNew<vtkImageData> imageData;
   QFileInfo info(fname);
   bool knownFileType = true;
+
+  // parse the file extension for supported volumetric file types.
   if (info.suffix() == QString(tr("nrrd")))
   {
+    // .nrrd file type. But it looks like if the compressed format isn't supported.
     vtkNew<vtkNrrdReader> reader;
     reader->SetFileName(fname.toStdString().c_str());
     reader->Update();
@@ -342,6 +345,7 @@ void basic_QtVTK::loadVolume()
   }
   else if (info.suffix() == QString(tr("mhd")))
   {
+    // standard metafile
     vtkNew<vtkMetaImageReader> reader;
     reader->SetFileName(fname.toStdString().c_str());
     reader->Update();
@@ -352,12 +356,14 @@ void basic_QtVTK::loadVolume()
     knownFileType = false;
   }
 
-  if (knownFileType)
+  if (knownFileType) // only do something if the file type is known.
   {
+    // use smart volume mapper for GPU rendering.
     vtkNew<vtkSmartVolumeMapper> mapper;
     mapper->SetBlendModeToComposite();
     mapper->SetInputData(imageData);
 
+    // define the appearance of the volume
     vtkNew<vtkVolumeProperty> volumeProperty;
     volumeProperty->ShadeOff();
     volumeProperty->SetInterpolationTypeToLinear();
@@ -392,7 +398,6 @@ void basic_QtVTK::loadVolume()
     ren->ResetCamera();
     ren->ResetCameraClippingRange();
     this->openGLWidget->GetRenderWindow()->Render();
-
   }
 }
 
