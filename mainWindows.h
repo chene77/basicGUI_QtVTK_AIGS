@@ -69,6 +69,7 @@ class vtkNDITracker;
 class vtkPoints;
 class vtkRenderer;
 class vtkTrackerTool;
+class vtkVolume;
 
 class QTimer;
 
@@ -148,7 +149,7 @@ private:
   vtkSmartPointer<vtkLogoWidget>                      trackerLogoWidget;
   vtkSmartPointer<vtkRenderer>                        ren;
   vtkSmartPointer<vtkPoints>                          fiducialPts;
-
+  vtkSmartPointer<vtkVolume>                          volume;
 
   /*!
   * Tracker related objects.

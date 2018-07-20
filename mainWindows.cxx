@@ -50,6 +50,7 @@ POSSIBILITY OF SUCH DAMAGES.
 #include <vtkAppendPolyData.h>
 #include <vtkButtonWidget.h>
 #include <vtkCamera.h>
+#include <vtkColorTransferFunction.h>
 #include <vtkConeSource.h>
 #include <vtkCoordinate.h>
 #include <vtkGenericOpenGLRenderWindow.h>
@@ -60,11 +61,14 @@ POSSIBILITY OF SUCH DAMAGES.
 #include <vtkLogoRepresentation.h>
 #include <vtkLogoWidget.h>
 #include <vtkMatrix4x4.h>
+#include <vtkMetaImageReader.h>
 #include <vtkNamedColors.h>
 #include <vtkNew.h>
+#include <vtkNrrdReader.h>
 #include <vtkOBJReader.h>
 #include <vtkPLYReader.h>
 #include <vtkPNGWriter.h>
+#include <vtkPiecewiseFunction.h>
 #include <vtkPoints.h>
 #include <vtkPolyData.h>
 #include <vtkPolyDataMapper.h>
@@ -77,12 +81,16 @@ POSSIBILITY OF SUCH DAMAGES.
 #include <vtkSimplePointsReader.h>
 #include <vtkSimplePointsWriter.h>
 #include <vtkSmartPointer.h>
+#include <vtkSmartVolumeMapper.h>
 #include <vtkSTLReader.h>
 #include <vtkTexturedButtonRepresentation2D.h>
 #include <vtkTransform.h>
 #include <vtkTubeFilter.h>
+#include <vtkVolume.h>
+#include <vtkVolumeProperty.h>
 #include <vtkWindowToImageFilter.h>
 #include <vtkXMLPolyDataReader.h>
+
 
 
 // tracker
@@ -132,6 +140,7 @@ void basic_QtVTK::createVTKObjects()
   trackerDrawing = vtkSmartPointer<vtkImageCanvasSource2D>::New();
   trackerLogoRepresentation = vtkSmartPointer<vtkLogoRepresentation>::New();
   trackerLogoWidget = vtkSmartPointer<vtkLogoWidget>::New();
+  volume = vtkSmartPointer<vtkVolume>::New();
 }
 
 
@@ -316,7 +325,75 @@ void basic_QtVTK::loadFiducialPts()
 
 void basic_QtVTK::loadVolume()
 {
-  std::cerr << "hello";
+  QString fname = QFileDialog::getOpenFileName(this,
+    tr("Open phantom volume"),
+    QDir::currentPath(),
+    "Volumetric File (*.nrrd *.mhd)");
+
+  vtkNew<vtkImageData> imageData;
+  QFileInfo info(fname);
+  bool knownFileType = true;
+  if (info.suffix() == QString(tr("nrrd")))
+  {
+    vtkNew<vtkNrrdReader> reader;
+    reader->SetFileName(fname.toStdString().c_str());
+    reader->Update();
+    imageData->ShallowCopy(reader->GetOutput());
+  }
+  else if (info.suffix() == QString(tr("mhd")))
+  {
+    vtkNew<vtkMetaImageReader> reader;
+    reader->SetFileName(fname.toStdString().c_str());
+    reader->Update();
+    imageData->ShallowCopy(reader->GetOutput());
+  }
+  else
+  {
+    knownFileType = false;
+  }
+
+  if (knownFileType)
+  {
+    vtkNew<vtkSmartVolumeMapper> mapper;
+    mapper->SetBlendModeToComposite();
+    mapper->SetInputData(imageData);
+
+    vtkNew<vtkVolumeProperty> volumeProperty;
+    volumeProperty->ShadeOff();
+    volumeProperty->SetInterpolationTypeToLinear();
+
+    vtkNew<vtkPiecewiseFunction> compositeOpacity;
+    compositeOpacity->AddPoint(-3024, 0, 0.5, 0.0);
+    compositeOpacity->AddPoint(-16, 0, .49, .61);
+    compositeOpacity->AddPoint(641, .72, .5, 0.0);
+    compositeOpacity->AddPoint(3071, .71, 0.5, 0.0);
+    volumeProperty->SetScalarOpacity(compositeOpacity); // composite first.
+
+    vtkNew<vtkColorTransferFunction> color;
+    color->AddRGBPoint(-3024, 0, 0, 0, 0.5, 0.0);
+    color->AddRGBPoint(-16, 0.73, 0.25, 0.30, 0.49, .61);
+    color->AddRGBPoint(641, .90, .82, .56, .5, 0.0);
+    color->AddRGBPoint(3071, 1, 1, 1, .5, 0.0);
+    volumeProperty->SetColor(color);
+    
+    volumeProperty->ShadeOn();
+    volumeProperty->SetAmbient(0.1);
+    volumeProperty->SetDiffuse(0.9);
+    volumeProperty->SetSpecular(0.2);
+    volumeProperty->SetSpecularPower(10.0);
+    volumeProperty->SetScalarOpacityUnitDistance(0.8919);
+
+    volume->SetMapper(mapper);
+    volume->SetProperty(volumeProperty);
+
+    ren->AddVolume(volume);
+
+    // reset the camera according to visible actors
+    ren->ResetCamera();
+    ren->ResetCameraClippingRange();
+    this->openGLWidget->GetRenderWindow()->Render();
+
+  }
 }
 
 void basic_QtVTK::loadMesh()
@@ -324,7 +401,7 @@ void basic_QtVTK::loadMesh()
   QString fname = QFileDialog::getOpenFileName(this,
     tr("Open phantom mesh"),
     QDir::currentPath(),
-    "PolyData File (*.vtk *.stl *.ply *.obj *.vtp)");
+    "PolyData File (*.vtk *.stl *.ply *.obj *.vtp )");
 
   // std::cerr << fname.toStdString().c_str() << std::endl;
 
